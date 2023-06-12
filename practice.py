@@ -285,12 +285,8 @@ def main(finetune_config):
                 test_data = DataAug.combine_columns(test_data)
 
             scaler = StandardScaler()
-            print(f'Printing the train_data_iloc varible before {train_data.iloc[:,1]}')
             train_data.iloc[:, 1] = scaler.fit_transform(train_data.iloc[:, 1].values.reshape(-1, 1))
-            print(f'printing the train_data.iloc[:,1] variable after {train_data.iloc[:, 1]}')
-            print(f'Printing the test_data_iloc varible before {test_data.iloc[:,1]}')
             test_data.iloc[:, 1] = scaler.transform(test_data.iloc[:, 1].values.reshape(-1, 1))
-            print(f'printing the test_data.iloc[:,1] variable after {test_data.iloc[:, 1]}')
 
             train_dataset = Downstream_Dataset(train_data, tokenizer, finetune_config['blocksize'])
             print(f'Tokenizer length: {len(tokenizer)}')
@@ -406,12 +402,8 @@ def main(finetune_config):
             test_data = DataAug.combine_columns(test_data)
 
         scaler = StandardScaler()
-        print(f'Printing the train_data_iloc varible before{train_data.iloc[:,1]}')
         train_data.iloc[:, 1] = scaler.fit_transform(train_data.iloc[:, 1].values.reshape(-1, 1))
-        print(f'Printing the train_data_iloc varible after{train_data.iloc[:,1]}')
-        print(f'Printing the test_data_iloc varible before {test_data.iloc[:,1]}')
         test_data.iloc[:, 1] = scaler.transform(test_data.iloc[:, 1].values.reshape(-1, 1))
-        print(f'Printing the test_data_iloc varible after {test_data.iloc[:,1]}')
 
         train_dataset = Downstream_Dataset(train_data, tokenizer, finetune_config['blocksize'])
         print(f'printing the train_dataset ')
