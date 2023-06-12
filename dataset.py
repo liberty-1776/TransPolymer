@@ -50,6 +50,7 @@ class LoadPretrainData(Dataset):
 
 """Downstream Dataset"""
 class Downstream_Dataset(Dataset):
+    print('Downstream_Dataset class is called')
     def __init__(self, dataset, tokenizer, max_token_len):
         self.tokenizer = tokenizer
         self.dataset = dataset
