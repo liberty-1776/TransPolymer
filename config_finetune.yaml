@@ -1,4 +1,4 @@
-CV_flag: False                                      # whether to use cross-validation
+CV_flag: False                                     # whether to use cross-validation
 add_vocab_flag: True                             # whether to add supplementary vocab
 LLRD_flag: False                                    # whether to use layer-wise lr decay
 aug_flag: False                                     # whether to apply data augmentation
