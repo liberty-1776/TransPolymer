@@ -106,7 +106,6 @@ def roberta_base_AdamW_LLRD(model, lr, weight_decay):
 """Model"""
 
 class DownstreamRegression(nn.Module):
-    print('Class DownstreamRegression is called')
     def __init__(self, drop_rate=0.1):
         super(DownstreamRegression, self).__init__()
         self.PretrainedModel = deepcopy(PretrainedModel)
@@ -121,31 +120,22 @@ class DownstreamRegression(nn.Module):
 
     def forward(self, input_ids, attention_mask):
         outputs = self.PretrainedModel(input_ids=input_ids, attention_mask=attention_mask)
-        logits = outputs.last_hidden_state[:, 0, :] #fingerprint
-        print(f'Finger print is:')
-        print(logits)
+        logits = outputs.last_hidden_state[:, 0, :]
         output = self.Regressor(logits)
         return output
 
 """Train"""
 
 def train(model, optimizer, scheduler, loss_fn, train_dataloader, device):
-    print('Train func is called')
+
     model.train()
 
     for step, batch in enumerate(train_dataloader):
-        print(f'Step: {step}')
-        print('Batch')
-        print(batch)
         input_ids = batch["input_ids"].to(device)
-        print('Input ids of batch')
-        print(input_ids)
         attention_mask = batch["attention_mask"].to(device)
         prop = batch["prop"].to(device).float()
         optimizer.zero_grad()
-        outputs,  = model(input_ids, attention_mask).float()
-        print('Output for step',step)
-        print(outputs)
+        outputs = model(input_ids, attention_mask).float()
         loss = loss_fn(outputs.squeeze(), prop.squeeze())
         loss.backward()
         optimizer.step()
@@ -154,8 +144,7 @@ def train(model, optimizer, scheduler, loss_fn, train_dataloader, device):
     return None
 
 def test(model, loss_fn, train_dataloader, test_dataloader, device, scaler, optimizer, scheduler, epoch):
-     
-    print('Test func is called')
+
     r2score = R2Score()
     train_loss = 0
     test_loss = 0
@@ -166,18 +155,11 @@ def test(model, loss_fn, train_dataloader, test_dataloader, device, scaler, opti
             []), torch.tensor([])
 
         for step, batch in enumerate(train_dataloader):
-            print(f'Step: {step}')
-            print('Batch')
-            print(batch)
             input_ids = batch["input_ids"].to(device)
-            print('Input ids for step',step)
-            print(input_ids)
             attention_mask = batch["attention_mask"].to(device)
             prop = batch["prop"].to(device).float()
             outputs = model(input_ids, attention_mask).float()
-            print(f'output for step{step} without reshaping')
             outputs = torch.from_numpy(scaler.inverse_transform(outputs.cpu().reshape(-1, 1)))
-            print(f'output for step{step} after reshaping')
             prop = torch.from_numpy(scaler.inverse_transform(prop.cpu().reshape(-1, 1)))
             loss = loss_fn(outputs.squeeze(), prop.squeeze())
             train_loss += loss.item() * len(prop)
@@ -246,7 +228,6 @@ def test(model, loss_fn, train_dataloader, test_dataloader, device, scaler, opti
 def main(finetune_config):
 
     """Tokenizer"""
-    print('adding the vocab file')
     if finetune_config['add_vocab_flag']:
         vocab_sup = pd.read_csv(finetune_config['vocab_sup_file'], header=None).values.flatten().tolist()
         tokenizer.add_tokens(vocab_sup)
@@ -254,24 +235,18 @@ def main(finetune_config):
     best_r2 = 0.0           # monitor the best r^2 in the run
 
     """Data"""
-    print('Checking if CV_flag is true or false')
     if finetune_config['CV_flag']:
         print("Start Cross Validation")
         data = pd.read_csv(finetune_config['train_file'])
-        print(data)
         """K-fold"""
-        print("splitting the data using the folds")
         splits = KFold(n_splits=finetune_config['k'], shuffle=True,
                        random_state=1)  # k=1 for train-test split and k=5 for cross validation
-        print(splits)
         train_loss_avg, test_loss_avg, train_r2_avg, test_r2_avg = [], [], [], []     # monitor the best metrics in each fold
         for fold, (train_idx, val_idx) in enumerate(splits.split(np.arange(data.shape[0]))):
             print('Fold {}'.format(fold + 1))
 
             train_data = data.loc[train_idx, :].reset_index(drop=True)
-            print(f'printing the train_idx and train data {train_idx}, {train_data}')
             test_data = data.loc[val_idx, :].reset_index(drop=True)
-            print(f'printing the train_idx and train data {val_idx}, {test_data}')
 
             if finetune_config['aug_flag']:
                 print("Data Augamentation")
@@ -289,18 +264,9 @@ def main(finetune_config):
             test_data.iloc[:, 1] = scaler.transform(test_data.iloc[:, 1].values.reshape(-1, 1))
 
             train_dataset = Downstream_Dataset(train_data, tokenizer, finetune_config['blocksize'])
-            print(f'Tokenizer length: {len(tokenizer)}')
-            print('printing the train dataset for model: ')
-            print(train_dataset)
             test_dataset = Downstream_Dataset(test_data, tokenizer, finetune_config['blocksize'])
-            print('printing the test dataset for model: ')
-            print(test_dataset)
             train_dataloader = DataLoader(train_dataset, finetune_config['batch_size'], shuffle=True, num_workers=finetune_config["num_workers"])
-            print('printing the train dataloader for model: ')
-            print(train_dataloader)
             test_dataloader = DataLoader(test_dataset, finetune_config['batch_size'], shuffle=False, num_workers=finetune_config["num_workers"])
-            print('printing the test dataloader for model: ')
-            print(test_dataloader)
 
             """Parameters for scheduler"""
             steps_per_epoch = train_data.shape[0] // finetune_config['batch_size']
@@ -308,17 +274,13 @@ def main(finetune_config):
             warmup_steps = int(training_steps * finetune_config['warmup_ratio'])
 
             """Train the model"""
-            print('Now loading the model using DownstreamRegression class')
             model = DownstreamRegression(drop_rate=finetune_config['drop_rate']).to(device)
             model = model.double()
             loss_fn = nn.MSELoss()
 
-            print('checking whether to use layer-wise lr decay ')
             if finetune_config['LLRD_flag']:
-                print('LLRD flag true')
                 optimizer = roberta_base_AdamW_LLRD(model, finetune_config['lr_rate'], finetune_config['weight_decay'])
             else:
-                print('using the Adamw optimizer')
                 optimizer = AdamW(
                     [
                         {"params": model.PretrainedModel.parameters(), "lr": finetune_config['lr_rate'],
@@ -328,12 +290,11 @@ def main(finetune_config):
                     ]
                 )
 
-                               num_training_steps=training_steps)
+            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=warmup_steps,
+                                                        num_training_steps=training_steps)
             torch.cuda.empty_cache()
-            train_loss_best, test_loss_best, best_train_r2, best_test_r2 = 0.0, 0.0, 0.0 scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=warmup_steps,
-                                    , 0.0  # Keep track of the best test r^2 in one fold. If cross-validation is not used, that will be the same as best_r2.
+            train_loss_best, test_loss_best, best_train_r2, best_test_r2 = 0.0, 0.0, 0.0, 0.0  # Keep track of the best test r^2 in one fold. If cross-validation is not used, that will be the same as best_r2.
             count = 0     # Keep track of how many successive non-improvement epochs
-            print('Starting the epochs')
             for epoch in range(finetune_config['num_epochs']):
                 print("epoch: %s/%s" % (epoch+1, finetune_config['num_epochs']))
                 train(model, optimizer, scheduler, loss_fn, train_dataloader, device)
@@ -382,15 +343,11 @@ def main(finetune_config):
         print("Standard Deviation of Test R^2 =", std_test_r2)
 
     else:
-        print('If k-fold flag false, using train test split')
         print("Train Test Split")
-        print('splitting the data')
         train_data = pd.read_csv(finetune_config['train_file'])
         test_data = pd.read_csv(finetune_config['test_file'])
 
-        print('checking the aug_flag')
         if finetune_config['aug_flag']:
-            print("Aug_Flag: True")
             print("Data Augmentation")
             DataAug = DataAugmentation(finetune_config['aug_indicator'])
             train_data = DataAug.smiles_augmentation(train_data)
@@ -406,7 +363,6 @@ def main(finetune_config):
         test_data.iloc[:, 1] = scaler.transform(test_data.iloc[:, 1].values.reshape(-1, 1))
 
         train_dataset = Downstream_Dataset(train_data, tokenizer, finetune_config['blocksize'])
-        print(f'printing the train_dataset ')
         test_dataset = Downstream_Dataset(test_data, tokenizer, finetune_config['blocksize'])
         train_dataloader = DataLoader(train_dataset, finetune_config['batch_size'], shuffle=True, num_workers=finetune_config["num_workers"])
         test_dataloader = DataLoader(test_dataset, finetune_config['batch_size'], shuffle=False, num_workers=finetune_config["num_workers"])
@@ -469,16 +425,13 @@ def main(finetune_config):
 
 if __name__ == "__main__":
 
-    print('Loading finetune_config file')
-    finetune_config = yaml.load(open("practice_finetune.yaml", "r"), Loader=yaml.FullLoader)
+    finetune_config = yaml.load(open("config_finetune.yaml", "r"), Loader=yaml.FullLoader)
     print(finetune_config)
 
     """Device"""
-    print('Checking device')
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     #device = torch.device("cpu")
 
-    print('Checking if pretrain or not')
     if finetune_config['model_indicator'] == 'pretrain':
         print("Use the pretrained model")
         PretrainedModel = RobertaModel.from_pretrained(finetune_config['model_path'])
@@ -501,7 +454,6 @@ if __name__ == "__main__":
     max_token_len = finetune_config['blocksize']
 
     """Run the main function"""
-    print('running main func')
     main(finetune_config)
 
 

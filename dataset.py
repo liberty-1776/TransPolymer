@@ -30,8 +30,7 @@ class LoadPretrainData(Dataset):
         return self.len
 
     def __getitem__(self, i):
-        smiles = self.dataset[i] #original
-        # smiles = self.dataset[i][0] updated version
+        smiles = self.dataset[i][0]
 
         encoding = self.tokenizer(
             str(smiles),
