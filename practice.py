@@ -143,7 +143,7 @@ def train(model, optimizer, scheduler, loss_fn, train_dataloader, device):
         attention_mask = batch["attention_mask"].to(device)
         prop = batch["prop"].to(device).float()
         optimizer.zero_grad()
-        outputs = model(input_ids, attention_mask).float()
+        outputs,  = model(input_ids, attention_mask).float()
         print('Output for step',step)
         print(outputs)
         loss = loss_fn(outputs.squeeze(), prop.squeeze())
@@ -328,10 +328,10 @@ def main(finetune_config):
                     ]
                 )
 
-            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=warmup_steps,
-                                                        num_training_steps=training_steps)
+                               num_training_steps=training_steps)
             torch.cuda.empty_cache()
-            train_loss_best, test_loss_best, best_train_r2, best_test_r2 = 0.0, 0.0, 0.0, 0.0  # Keep track of the best test r^2 in one fold. If cross-validation is not used, that will be the same as best_r2.
+            train_loss_best, test_loss_best, best_train_r2, best_test_r2 = 0.0, 0.0, 0.0 scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=warmup_steps,
+                                    , 0.0  # Keep track of the best test r^2 in one fold. If cross-validation is not used, that will be the same as best_r2.
             count = 0     # Keep track of how many successive non-improvement epochs
             print('Starting the epochs')
             for epoch in range(finetune_config['num_epochs']):
