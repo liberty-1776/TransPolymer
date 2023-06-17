@@ -163,7 +163,7 @@ def test(model, loss_fn, train_dataloader, test_dataloader, device, scaler, opti
             prop = torch.from_numpy(scaler.inverse_transform(prop.cpu().reshape(-1, 1)))
             loss = loss_fn(outputs.squeeze(), prop.squeeze())
             train_loss += loss.item() * len(prop)
-            train_pred = torch.cat([train_pred.to(device), outputs.to(device)])
+            train_pred = torch.cat([train_pred.to(device), (outputs.double()).to(device)])
             train_true = torch.cat([train_true.to(device), prop.to(device)])
 
         train_loss = train_loss / len(train_pred.flatten())
@@ -425,8 +425,8 @@ def main(finetune_config):
 
 if __name__ == "__main__":
 
+    torch.cuda.empty_cache()
     finetune_config = yaml.load(open("config_finetune.yaml", "r"), Loader=yaml.FullLoader)
-    print(finetune_config)
 
     """Device"""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -455,9 +455,12 @@ if __name__ == "__main__":
 
     """Run the main function"""
     main(finetune_config)
+<<<<<<< HEAD
 
 
 
 
 
 
+=======
+>>>>>>> 46b6dc96728020a875c00526501affd920d3e31a
