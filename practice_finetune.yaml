@@ -1,4 +1,4 @@
-CV_flag: False                                      # whether to use cross-validation
+CV_flag: True                                     # whether to use cross-validation
 add_vocab_flag: True                             # whether to add supplementary vocab
 LLRD_flag: False                                    # whether to use layer-wise lr decay
 aug_flag: False                                     # whether to apply data augmentation
@@ -8,15 +8,15 @@ aug_indicator:                                     # number of augmentation per 
 
 vocab_sup_file: 'data/vocab/vocab_sup_PE_I.csv'           # supplementary vocab file path
 train_file: 'data/practice.csv'                   # train file path
-test_file: 'data/test_PE_I.csv'                     # test file path if cross-validation is not used
+test_file: 'data/practice.csv'                     # test file path if cross-validation is not used
 model_path: 'ckpt/pretrain.pt'                      # pretrain model path
-save_path: 'ckpt/Egc_train.pt'                     # checkpoint path
-best_model_path: 'ckpt/Egc_best_model.pt'          # best model save path
+save_path: 'ckpt/practice_train.pt'                     # checkpoint path
+best_model_path: 'ckpt/practice_best_model.pt'          # best model save path
 
 k: 5                                                # k-fold cross-validation
 blocksize: 411                                      # max length of sequences after tokenization
-batch_size: 10                                      # batch size
-num_epochs: 20                                      # total number of epochs
+batch_size: 1                                      # batch size
+num_epochs: 1                                      # total number of epochs
 warmup_ratio: 0.05                                  # warmup ratio
 drop_rate: 0.1                                      # dropout
 lr_rate: 0.00005                                    # initial lr for LLRD and pretrained model lr otherwise

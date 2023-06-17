@@ -455,12 +455,3 @@ if __name__ == "__main__":
 
     """Run the main function"""
     main(finetune_config)
-<<<<<<< HEAD
-
-
-
-
-
-
-=======
->>>>>>> 46b6dc96728020a875c00526501affd920d3e31a
