@@ -7,11 +7,11 @@ model_indicator: 'pretrain'                        # whether to use pretrained m
 aug_indicator:                                     # number of augmentation per SMILES. If no limitation, assign the indicator with None (leave it blank).
 
 vocab_sup_file: 'data/vocab/vocab_sup_PE_I.csv'           # supplementary vocab file path
-train_file: 'data/Egb.csv'                   # train file path
-test_file: 'data/Egb.csv'                     # test file path if cross-validation is not used
+train_file: 'data/Eea.csv'                   # train file path
+test_file: 'data/Eea.csv'                     # test file path if cross-validation is not used
 model_path: 'ckpt/pretrain.pt'                      # pretrain model path
-save_path: 'ckpt/Egb/Egb_train.pt'                     # checkpoint path
-best_model_path: 'ckpt/Egb/Egb_best_model.pt'          # best model save path
+save_path: 'ckpt/Eea/Eea_train.pt'                     # checkpoint path
+best_model_path: 'ckpt/Eea/Eea_best_model.pt'          # best model save path
 
 k: 5                                                # k-fold cross-validation
 blocksize: 411                                      # max length of sequences after tokenization

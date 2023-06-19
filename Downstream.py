@@ -163,8 +163,8 @@ def test(model, loss_fn, train_dataloader, test_dataloader, device, scaler, opti
             prop = torch.from_numpy(scaler.inverse_transform(prop.cpu().reshape(-1, 1)))
             loss = loss_fn(outputs.squeeze(), prop.squeeze())
             train_loss += loss.item() * len(prop)
-            train_pred = torch.cat([train_pred.to(device), (outputs.double()).to(device)])
-            train_true = torch.cat([train_true.to(device), prop.to(device)])
+            train_pred = torch.cat([train_pred.double().to(device), (outputs.double()).to(device)])
+            train_true = torch.cat([train_true.double().to(device), prop.double().to(device)])
 
         train_loss = train_loss / len(train_pred.flatten())
         r2_train = r2score(train_pred.flatten().to("cpu"), train_true.flatten().to("cpu")).item()
@@ -180,8 +180,8 @@ def test(model, loss_fn, train_dataloader, test_dataloader, device, scaler, opti
             prop = torch.from_numpy(scaler.inverse_transform(prop.cpu().reshape(-1, 1)))
             loss = loss_fn(outputs.squeeze(), prop.squeeze())
             test_loss += loss.item() * len(prop)
-            test_pred = torch.cat([test_pred.to(device), outputs.to(device)])
-            test_true = torch.cat([test_true.to(device), prop.to(device)])
+            test_pred = torch.cat([test_pred.double().to(device), outputs.double().to(device)])
+            test_true = torch.cat([test_true.double().to(device), prop.double().to(device)])
 
         test_loss = test_loss / len(test_pred.flatten())
         r2_test = r2score(test_pred.flatten().to("cpu"), test_true.flatten().to("cpu")).item()
