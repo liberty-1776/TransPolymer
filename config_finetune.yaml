@@ -1,17 +1,17 @@
 CV_flag: True                                     # whether to use cross-validation
 add_vocab_flag: True                             # whether to add supplementary vocab
 LLRD_flag: False                                    # whether to use layer-wise lr decay
-aug_flag: False                                    # whether to apply data augmentation
-aug_special_flag: False                           # whether to augment copolymer SMILES
+aug_flag: True                                    # whether to apply data augmentation
+aug_special_flag: False                         # whether to augment copolymer SMILES
 model_indicator: 'pretrain'                        # whether to use pretrained model
 aug_indicator:                                     # number of augmentation per SMILES. If no limitation, assign the indicator with None (leave it blank).
 
 vocab_sup_file: 'data/vocab/vocab_sup_PE_II.csv'           # supplementary vocab file path
-train_file: 'data/PE_II.csv'                   # train file path
-test_file: 'data/PE_II.csv'                     # test file path if cross-validation is not used
+train_file: 'data/Egc.csv'                   # train file path
+test_file: 'data/Egc.csv'                     # test file path if cross-validation is not used
 model_path: 'ckpt/pretrain.pt'                      # pretrain model path
-save_path: 'ckpt/PE-II/PE-II_train.pt'                     # checkpoint path
-best_model_path: 'ckpt/PE-II/PE-II_best_model.pt'          # best model save path
+save_path: 'mywork/aug_ckpt/Egc/Egc_train.pt'                     # checkpoint path
+best_model_path: 'mywork/aug_ckpt/Egc/Egc_best_model.pt'          # best model save path
 
 k: 5                                                # k-fold cross-validation
 blocksize: 411                                      # max length of sequences after tokenization
