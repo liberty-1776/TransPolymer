@@ -441,7 +441,7 @@ if __name__ == "__main__":
         PretrainedModel.config.hidden_dropout_prob = finetune_config['hidden_dropout_prob']
         PretrainedModel.config.attention_probs_dropout_prob = finetune_config['attention_probs_dropout_prob']
     else:
-        print("No Pretrain")
+        print("No Pretrain!")
         config = RobertaConfig(
             vocab_size=50265,
             max_position_embeddings=514,
